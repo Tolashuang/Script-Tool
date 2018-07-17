@@ -93,7 +93,7 @@ def check_person_labels(str_name):
     print "done!"
     
 if __name__ == "__main__":
-    #os.chdir(r"C:\Users\jimmypan\Downloads\PalmData");
+    #os.chdir(r"C:\Users\１.txt");
     #check_person_labels("palm_part1")
     #check_person_labels("palm_part2")
     #check_person_labels("palm_part3")
