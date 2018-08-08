@@ -1,0 +1,101 @@
+import os
+import math
+from PIL import Image
+from xml.etree import ElementTree
+
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+
+classes = [ "Body", "Hand"]
+
+def find_x_y_w_h(size, box):
+    print(size[0])
+    dw = 1./size[0]
+    dh = 1./size[1]
+    x = (box[0] + box[1])/2.0
+    y = (box[2] + box[3])/2.0
+    w = box[1] - box[0]
+    h = box[3] - box[2]
+    x = x*dw
+    w = w*dw
+    y = y*dh
+    h = h*dh
+    return (x,y,w,h)
+
+# os.chdir(r"C:/Users/Tolas_huang/Desktop/YOLO_database")
+# files = os.listdir(r"D:/yolo_train/data/Annotations/")
+files = open("C:/Users/Tolas_huang/Desktop/YOLO_database/photo_fist_xml.txt")
+
+while (1):
+    line_name = files.readline()
+    files_son_name = line_name.split("/")
+    #创建文件夹
+    path = "C:/Users/Tolas_huang/Desktop/YOLO_database/fist_label/" + files_son_name[1] + "/"
+    folder = os.path.exists(path)
+    if not folder:
+        os.makedirs(path)
+    print(files_son_name[1])
+
+    #在XML中摘出属性和位置信息
+    fin = open("C:/Users/Tolas_huang/Desktop/YOLO_database/" + "ok_palm_fist_photo_no_distortion_xml" + "\\" + line_name[:-5] + ".txt", "w+")
+    with open("C:/Users/Tolas_huang/Desktop/YOLO_database/" + "ok_palm_fist_photo_no_distortion_xml" + "/" + line_name[: -1] , 'r') as f:
+        tree = ET.parse(f)
+        root = tree.getroot()
+        print(root[0].text)
+
+    root_son = root.find('OBJECTS')
+    for son_of_root in root_son.iter('OBJECT'):
+
+            lstnode = son_of_root.getiterator('POINTS')
+            for node in lstnode:
+                lx = node.attrib['LEFTX']
+                ly = node.attrib['LEFTY']
+                rx = node.attrib['RIGHTX']
+                ry = node.attrib['RIGHTY']
+                tx = node.attrib['TOPX']
+                ty = node.attrib['TOPY']
+                bx = node.attrib['BOTTOMX']
+                by = node.attrib['BOTTOMY']
+
+                #手上的斜率为O的情况
+                if (float(tx) - float(bx)) == 0 or (float(ty) - float(by)) == 0 :
+                    lux = float(lx)
+                    luy = float(ty)
+                    rux = float(rx)
+                    ruy = float(ty)
+                    ldx = float(lx)
+                    ldy = float(by)
+                    rdx = float(rx)
+                    rdy = float(by)
+                    print('*******')
+                else:
+                    k = (float(ty) - float( by))/(float(tx) - float(bx))
+                    y_tr = (((k * float(ty) + float(ry) / k) - (float(tx) + float(rx))) / (k + 1 / k))
+                    x_tr = (1 / k) * (y_tr - float(ry)) + float(rx)
+                    y_rb = (((k * float(by) + float(ry) / k) - (float(bx) + float(rx))) / (k + 1 / k))
+                    x_rb = (1 / k) * (y_rb - float(ry)) + float(rx)
+                    y_bl = (((k * float(by) + float(ly) / k) - (float(bx) + float(lx))) / (k + 1 / k))
+                    x_bl = (1 / k) * (y_bl - float(ly)) + float(lx)
+                    y_lt = (((k * float(ty) + float(ly) / k) - (float(tx) + float(lx))) / (k + 1 / k))
+                    x_lt = (1 / k) * (y_lt - float(ly)) + float(lx)
+
+                    cx = ( x_tr + x_rb + x_bl + x_lt) / (4 * 640)
+                    cy = ( y_tr + y_rb + y_bl + y_lt) / (4 * 480)
+                    angle = -math.atan(k)
+                    fabsh = math.sqrt(pow(float(x_lt) - float(x_bl), 2) + pow(float(y_lt) - float(y_bl), 2))
+                    fabsw = math.sqrt(pow(float(x_lt) - float(x_tr), 2) + pow(float(y_lt) - float(y_tr), 2))
+                    frw = (fabsw * (1 - abs(math.tan(angle / 2))) + fabsh * abs(math.tan(angle / 2)))/ 640
+                    frh = (fabsh * (1 - abs(math.tan(angle / 2))) + fabsw * abs(math.tan(angle / 2)))/ 480
+                    print(cx,cy,frw,frh)
+
+                    print(k)
+
+            print("========")
+    if not line_name:
+        break
+
+
+
+    fin.close()
