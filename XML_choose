@@ -39,7 +39,7 @@ while (1):
     print(files_son_name[1])
 
     #在XML中摘出属性和位置信息
-    fin = open("C:/Users/Tolas_huang/Desktop/YOLO_database/" + "ok_palm_fist_photo_no_distortion_xml" + "\\" + line_name[:-5] + ".txt", "w+")
+    fin = open(path  + "/" + files_son_name[-1][:-5] + ".txt", "w+")
     with open("C:/Users/Tolas_huang/Desktop/YOLO_database/" + "ok_palm_fist_photo_no_distortion_xml" + "/" + line_name[: -1] , 'r') as f:
         tree = ET.parse(f)
         root = tree.getroot()
@@ -47,54 +47,78 @@ while (1):
 
     root_son = root.find('OBJECTS')
     for son_of_root in root_son.iter('OBJECT'):
-
             lstnode = son_of_root.getiterator('POINTS')
             for node in lstnode:
-                lx = node.attrib['LEFTX']
-                ly = node.attrib['LEFTY']
-                rx = node.attrib['RIGHTX']
-                ry = node.attrib['RIGHTY']
-                tx = node.attrib['TOPX']
-                ty = node.attrib['TOPY']
-                bx = node.attrib['BOTTOMX']
-                by = node.attrib['BOTTOMY']
+                for elem in son_of_root.iter(tag='TYPE'):
+                    print(elem.text)
+                    lx = node.attrib['LEFTX']
+                    ly = node.attrib['LEFTY']
+                    rx = node.attrib['RIGHTX']
+                    ry = node.attrib['RIGHTY']
+                    tx = node.attrib['TOPX']
+                    ty = node.attrib['TOPY']
+                    bx = node.attrib['BOTTOMX']
+                    by = node.attrib['BOTTOMY']
+                    global labels
+                    if elem.text == 'Hand':
+                        labels = 1
 
-                #手上的斜率为O的情况
-                if (float(tx) - float(bx)) == 0 or (float(ty) - float(by)) == 0 :
-                    lux = float(lx)
-                    luy = float(ty)
-                    rux = float(rx)
-                    ruy = float(ty)
-                    ldx = float(lx)
-                    ldy = float(by)
-                    rdx = float(rx)
-                    rdy = float(by)
-                    print('*******')
-                else:
-                    y_tr = ((( (float(rx) - float(tx)) + ( float(ty) / k - float(ry) * k) )) / (1 / k - k))
-                    x_tr = (1 / k) * (y_tr - float(ty)) + float(tx)
-                    y_rb = ((( (float(rx) - float(bx)) + ( float(by) / k - float(ry) * k) )) / (1 / k - k))
-                    x_rb = (1 / k) * (y_rb - float(by)) + float(bx)
-                    y_bl = ((( (float(lx) - float(bx)) + ( float(by) / k - float(ly) * k) )) / (1 / k - k))
-                    x_bl = (1 / k) * (y_bl - float(by)) + float(bx)
-                    y_lt = ((( (float(lx) - float(tx)) + ( float(ty) / k - float(ly) * k) )) / (1 / k - k))
-                    x_lt = (1 / k) * (y_lt - float(ty)) + float(tx)
+                        #手上的斜率为O的情况
+                        # k = (float(ty) - float(by)) / (float(tx) - float(bx))
+                        if (float(tx) - float(bx)) == 0 or (float(ty) - float(by)) == 0 :
+                            lux = float(lx)
+                            luy = float(ty)
+                            rux = float(rx)
+                            ruy = float(ty)
+                            ldx = float(lx)
+                            ldy = float(by)
+                            rdx = float(rx)
+                            rdy = float(by)
+                            print('*******')
 
-                    cx = ( x_tr + x_rb + x_bl + x_lt) / (4 * 640)
-                    cy = ( y_tr + y_rb + y_bl + y_lt) / (4 * 480)
-                    angle = -math.atan(k)
-                    fabsh = math.sqrt(pow(float(x_lt) - float(x_bl), 2) + pow(float(y_lt) - float(y_bl), 2))
-                    fabsw = math.sqrt(pow(float(x_lt) - float(x_tr), 2) + pow(float(y_lt) - float(y_tr), 2))
-                    frw = (fabsw * (1 - abs(math.tan(angle / 2))) + fabsh * abs(math.tan(angle / 2)))/ 640
-                    frh = (fabsh * (1 - abs(math.tan(angle / 2))) + fabsw * abs(math.tan(angle / 2)))/ 480
-                    print(cx,cy,frw,frh)
 
-                    print(k)
+                        else:
+                            k = (float(ty) - float(by)) / (float(tx) - float(bx))
+                            y_tr = ((( (float(rx) - float(tx)) + ( float(ty) / k - float(ry) * k) )) / (1 / k - k))
+                            x_tr = (1 / k) * (y_tr - float(ty)) + float(tx)
+                            y_rb = ((( (float(rx) - float(bx)) + ( float(by) / k - float(ry) * k) )) / (1 / k - k))
+                            x_rb = (1 / k) * (y_rb - float(by)) + float(bx)
+                            y_bl = ((( (float(lx) - float(bx)) + ( float(by) / k - float(ly) * k) )) / (1 / k - k))
+                            x_bl = (1 / k) * (y_bl - float(by)) + float(bx)
+                            y_lt = ((( (float(lx) - float(tx)) + ( float(ty) / k - float(ly) * k) )) / (1 / k - k))
+                            x_lt = (1 / k) * (y_lt - float(ty)) + float(tx)
 
+                            cx = ( x_tr + x_rb + x_bl + x_lt) / (4 * 640)
+                            cy = ( y_tr + y_rb + y_bl + y_lt) / (4 * 480)
+                            angle = -math.atan(k)
+                            fabsh = math.sqrt(pow(float(x_lt) - float(x_bl), 2) + pow(float(y_lt) - float(y_bl), 2))
+                            fabsw = math.sqrt(pow(float(x_lt) - float(x_tr), 2) + pow(float(y_lt) - float(y_tr), 2))
+                            frw = (fabsw * (1 - abs(math.tan(angle / 2))) + fabsh * abs(math.tan(angle / 2)))/ 640
+                            frh = (fabsh * (1 - abs(math.tan(angle / 2))) + fabsw * abs(math.tan(angle / 2)))/ 480
+                            print(labels,cx,cy,frw,frh)
+                            fin.writelines("%d %f %f %f %f" % (labels, cx,cy,frw,frh))
+                            fin.writelines("\n")
+                            # print(k)
+                    else:
+                        labels = 0
+                        #人体矩形框的四个点确定
+                        lux = float(lx)
+                        luy = float(ty)
+                        rux = float(rx)
+                        ruy = float(ty)
+                        ldx = float(lx)
+                        ldy = float(by)
+                        rdx = float(rx)
+                        rdy = float(by)
+                        cx = (lux + rux + ldx + rdx) / (4 * 640)
+                        cy = (luy + ruy + ldy + rdy) / (4 * 480)
+                        frw = (rux - lux ) / 640
+                        frh = (rdy - ruy ) / 480
+                        print(labels, cx, cy, frw, frh)
+                        fin.writelines("%d %f %f %f %f" % (labels, cx, cy, frw, frh))
+                        fin.writelines("\n")
             print("========")
     if not line_name:
         break
-
-
 
     fin.close()
