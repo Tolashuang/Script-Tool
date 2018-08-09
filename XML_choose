@@ -26,13 +26,13 @@ def find_x_y_w_h(size, box):
 
 # os.chdir(r"C:/Users/Tolas_huang/Desktop/YOLO_database")
 # files = os.listdir(r"D:/yolo_train/data/Annotations/")
-files = open("C:/Users/Tolas_huang/Desktop/YOLO_database/photo_fist_xml.txt")
+files = open("C:/Users/Tolas_huang/Desktop/YOLO_database/photo_palm_xml.txt")
 
 while (1):
     line_name = files.readline()
     files_son_name = line_name.split("/")
     #创建文件夹
-    path = "C:/Users/Tolas_huang/Desktop/YOLO_database/fist_label/" + files_son_name[1] + "/"
+    path = "C:/Users/Tolas_huang/Desktop/YOLO_database/palm_label/" + files_son_name[1] + "/"
     folder = os.path.exists(path)
     if not folder:
         os.makedirs(path)
@@ -50,7 +50,7 @@ while (1):
             lstnode = son_of_root.getiterator('POINTS')
             for node in lstnode:
                 for elem in son_of_root.iter(tag='TYPE'):
-                    print(elem.text)
+                    # print(elem.text)
                     lx = node.attrib['LEFTX']
                     ly = node.attrib['LEFTY']
                     rx = node.attrib['RIGHTX']
@@ -74,31 +74,71 @@ while (1):
                             ldy = float(by)
                             rdx = float(rx)
                             rdy = float(by)
-                            print('*******')
-
+                            cx = (lux + rux + ldx + rdx) / (4 * 640)
+                            cy = (luy + ruy + ldy + rdy) / (4 * 480)
+                            frw = (rux - lux) / 640
+                            frh = (rdy - ruy) / 480
+                            # print(labels, cx, cy, frw, frh)
+                            fin.writelines("%d %f %f %f %f" % (labels, cx, cy, frw, frh))
+                            fin.writelines("\n")
 
                         else:
                             k = (float(ty) - float(by)) / (float(tx) - float(bx))
-                            y_tr = ((( (float(rx) - float(tx)) + ( float(ty) / k - float(ry) * k) )) / (1 / k - k))
-                            x_tr = (1 / k) * (y_tr - float(ty)) + float(tx)
-                            y_rb = ((( (float(rx) - float(bx)) + ( float(by) / k - float(ry) * k) )) / (1 / k - k))
-                            x_rb = (1 / k) * (y_rb - float(by)) + float(bx)
-                            y_bl = ((( (float(lx) - float(bx)) + ( float(by) / k - float(ly) * k) )) / (1 / k - k))
-                            x_bl = (1 / k) * (y_bl - float(by)) + float(bx)
-                            y_lt = ((( (float(lx) - float(tx)) + ( float(ty) / k - float(ly) * k) )) / (1 / k - k))
-                            x_lt = (1 / k) * (y_lt - float(ty)) + float(tx)
+                            a0 = -(1.0/k)
+                            a1 = a0
+                            a2 = k
+                            a3 = k
+                            b0 = float(ty) - a0 * float(tx)
+                            b1 = float(by) - a1 * float(bx)
+                            b2 = float(ly) - a2 * float(lx)
+                            b3 = float(ry) - a3 * float(rx)
+                            x_tr = (b3 - b0) / (a0 - a3)
+                            y_tr = a3 * x_tr + b3
+                            x_rb = (b3 - b1) / (a1 - a3)
+                            y_rb = a3 * x_rb + b3
+                            x_bl = (b1 - b2) / (a2 - a1)
+                            y_bl = a2 * x_bl + b2
+                            x_lt = (b0 - b2) / (a2 - a0)
+                            y_lt = a2 * x_lt + b2
 
                             cx = ( x_tr + x_rb + x_bl + x_lt) / (4 * 640)
                             cy = ( y_tr + y_rb + y_bl + y_lt) / (4 * 480)
-                            angle = -math.atan(k)
+                            angle = math.atan(k)
                             fabsh = math.sqrt(pow(float(x_lt) - float(x_bl), 2) + pow(float(y_lt) - float(y_bl), 2))
                             fabsw = math.sqrt(pow(float(x_lt) - float(x_tr), 2) + pow(float(y_lt) - float(y_tr), 2))
-                            frw = (fabsw * (1 - abs(math.tan(angle / 2))) + fabsh * abs(math.tan(angle / 2)))/ 640
-                            frh = (fabsh * (1 - abs(math.tan(angle / 2))) + fabsw * abs(math.tan(angle / 2)))/ 480
-                            print(labels,cx,cy,frw,frh)
-                            fin.writelines("%d %f %f %f %f" % (labels, cx,cy,frw,frh))
+                            frh = (fabsw * (1 - abs(math.tan(angle / 2))) + fabsh * abs(math.tan(angle / 2)))/ 480
+                            frw = (fabsh * (1 - abs(math.tan(angle / 2))) + fabsw * abs(math.tan(angle / 2)))/ 640
+
+                            # cx = (x_tr + x_rb + x_bl + x_lt) / (4 * 640)
+                            # cy = (y_tr + y_rb + y_bl + y_lt) / (4 * 480)
+                            # frw = (x_rb - x_bl) / 640
+                            # frh = (y_bl - y_lt) / 480
+                            # print("ww-----------------------")
+
+                            # print(labels,cx,cy,frw,frh)
+                            fin.writelines("%d %f %f %f %f" % (labels, cx ,cy, frw, frh))
                             fin.writelines("\n")
-                            # print(k)
+
+                            # else:
+                            #     fin.writelines("%d %f %f %f %f" % (labels, cx, cy, frw, frh))
+                            #     fin.writelines("\n")
+                                # print(k)
+                            # else:
+                            #     y_tr = ((( (float(tx) - float(rx)) + ( float(ry) / k - float(ty) * k) )) / (1.0001 / k - k))
+                            #     x_tr = (1 / k) * (y_tr - float(ry)) + float(rx)
+                            #     y_rb = ((( (float(bx) - float(rx)) + ( float(ry) / k - float(ty) * k) )) / (1.0001 / k - k))
+                            #     x_rb = (1 / k) * (y_rb - float(ry)) + float(rx)
+                            #     y_bl = ((( (float(bx) - float(lx)) + ( float(ly) / k - float(by) * k) )) / (1.0001 / k - k))
+                            #     x_bl = (1 / k) * (y_bl - float(ly)) + float(lx)
+                            #     y_lt = ((( (float(tx) - float(lx)) + ( float(ly) / k - float(ty) * k) )) / (1.0001 / k - k))
+                            #     x_lt = (1 / k) * (y_lt - float(ly)) + float(lx)
+                            #     cx = ( x_tr + x_rb + x_bl + x_lt) / (4 * 640)
+                            #     cy = ( y_tr + y_rb + y_bl + y_lt) / (4 * 480)
+                            #     frw = abs(x_tr - x_bl) / 640
+                            #     frh = abs(y_rb - y_lt) / 480
+                            #     print(labels, cx, cy, frw, frh)
+                            #     fin.writelines("%d %f %f %f %f" % (labels, cx,cy,frw,frh))
+                            #     fin.writelines("\n")
                     else:
                         labels = 0
                         #人体矩形框的四个点确定
@@ -117,7 +157,7 @@ while (1):
                         print(labels, cx, cy, frw, frh)
                         fin.writelines("%d %f %f %f %f" % (labels, cx, cy, frw, frh))
                         fin.writelines("\n")
-            print("========")
+            # print("========")
     if not line_name:
         break
 
