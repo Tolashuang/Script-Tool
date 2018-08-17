@@ -1,0 +1,53 @@
+import os
+import math
+from PIL import Image
+import ast
+
+files = open("F:/huanugtao/CrowdHuman/annotation.odgt")
+
+def get_image_w_h(image_name):
+    global image_w ,image_h
+    path = "F:/huanugtao/CrowdHuman/Images/" + image_name + ".jpg"
+    img = Image.open(path)
+    (image_w,image_h) = img.size
+    return  image_w,image_h
+
+def get_vbox(fbox):
+    x = fbox[0]/image_w
+    y = fbox[1]/image_h
+    w = fbox[2]/image_w
+    h = fbox[3]/image_h
+    return x,y,w,h
+
+
+while (1):
+    if not files.readline():
+        break
+    line_name = files.readline()
+    print(line_name)
+    dic_picture = ast.literal_eval(line_name)
+    print(dic_picture)
+    for dic_picture_elem in dic_picture.items():
+        global image_name
+        if dic_picture_elem[0] == "ID" :
+            (image_w,image_h) = get_image_w_h(dic_picture_elem[1])
+            print(image_w,image_h)
+            image_name = dic_picture_elem[1]
+        fin = open("F:/huanugtao/CrowdHuman/labels/" + image_name + ".txt", "w+")
+        if dic_picture_elem[0] =="gtboxes":
+            for dic_picture_elem_box in dic_picture_elem[1]:
+                for dic_picture_elem_box_person in dic_picture_elem_box.items():
+                    # dic_picture_elem_box_person_dic = ast.literal_eval(dic_picture_elem_box_person)
+                    # print(dic_picture_elem_box_person)
+                    if dic_picture_elem_box_person[0] == 'fbox':
+                        print(dic_picture_elem_box_person[1])
+                        print(dic_picture_elem_box)
+                        x,y,w,h = get_vbox(dic_picture_elem_box_person[1])
+                        print(x,y,w,h)
+                        fin.writelines("%d %f %f %f %f" % (1, x, y, w, h))
+                        fin.writelines("\n")
+    print("----------------------")
+fin.close()
+
+
+
