@@ -1,0 +1,89 @@
+DEBUG_FLAG = True
+import os
+from PIL import Image
+import sys
+
+if DEBUG_FLAG:
+    from PIL import ImageDraw
+import json
+# from skimage import draw,data
+
+
+# file = open("../new.txt", 'a')
+# file.close()
+
+def check_rect(rt, width, height):
+    if rt[0] >= 0 and rt[2] > 0 and rt[0] + rt[2] <= width and rt[1] >= 0 and rt[3] > 0 and rt[1] + rt[3] <= height:
+        return True
+    else:
+        return False
+
+def check_person_labels(str_name):
+    flabel = open('../labels_json/' + str_name + '.json')
+    json_obj = json.load(flabel)
+    if not os.access('../CheckImages', os.F_OK):
+        os.mkdir('../CheckImages')
+
+    cnt = 0
+    r = 0
+    for node in json_obj['images']:
+        img_name = str(node['file'])
+        cnt += 1
+
+        try:
+            img = Image.open('../JPEGImages/' + str_name + '/'+img_name)
+            [width, height] = img.size
+            print ([width, height])
+        except IOError:
+            print ( 'fail to open image:' + img_name)
+            continue
+        except:
+            print ('Error occurred.')
+            continue
+
+        L = []
+        for box in node['boxes']:
+            if box['width'] > 0 and box['height'] > 0:
+                L.append([box['object'], box['left'], box['top'], box['width'], box['height'], box['object']])
+
+        if len(L) > 0:
+            # txt_path = ('../labels_txt/' + img_name[:-4] + '.txt')
+            flabel_out = open("../labels/"+ str_name + '/' +img_name[:-4] +".txt", 'w')
+            # flabel_out = open(txt_path, 'w')
+            print(img_name)
+            for lnode in L:
+                # if not check_rect(lnode, width, height):
+
+                print ("(%s,%f,%f,%f,%f) " % (lnode[0], lnode[1], lnode[2], lnode[3],lnode[4]))
+                #     # continue
+                # else:
+                # flabel_out.writelines(' '.join([str(lnode[0]), str(lnode[1]), str(lnode[2]), str(lnode[3]), lnode[4]]) + "\n")
+                flabel_out.writelines(' '.join( [str(lnode[0]), str(lnode[1]/width), str(lnode[2]/height), str(lnode[3]/width), str(lnode[4]/height)])+ "\n")
+
+                # if lnode[4] == 'Full':
+                #     color = (0, 0, 255)
+                # if lnode[4] == 'Upper':
+                #     color = (0, 255, 255)
+                # if lnode[4] == 'Head':
+                #     color = (255, 0, 0)
+                # if lnode[4] == 'Body':
+                #     color = (0, 64, 0)
+                # draw.line((lnode[0], lnode[1], lnode[0], lnode[1] + lnode[3]), fill=color, width=3)
+                # draw.line((lnode[0], lnode[1], lnode[0] + lnode[2], lnode[1]), fill=color, width=3)
+                # draw.line((lnode[0] + lnode[2], lnode[1], lnode[0] + lnode[2], lnode[1] + lnode[3]), fill=color,
+                #           width=3)
+                # draw.line((lnode[0], lnode[1] + lnode[3], lnode[0] + lnode[2], lnode[1] + lnode[3]), fill=color,
+                #           width=3)
+
+            # img.save("../CheckImages/" + img_name, qtables='web_low')
+            flabel_out.close()
+
+    print (str(cnt))
+    print (str(r))
+    print ("done!")
+
+
+if __name__ == "__main__":
+    check_person_labels("1")
+    check_person_labels("2")
+    check_person_labels("3")
