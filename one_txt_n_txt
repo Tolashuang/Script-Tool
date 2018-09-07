@@ -1,0 +1,38 @@
+import sys
+import os
+from PIL import Image
+import linecache
+
+def check_hand_labels(str_name):
+    file_object = open(str_name)
+    cnt = 1
+    try:
+        # while(1):
+        for line in file_object:
+            # line_son = line.split()
+            # print (line_son)
+            count = linecache.getline(str_name, cnt)
+            count_son = count.split()
+            print (count_son[3])
+            for num in range(int(count_son[3])):
+                txt_path = "/home/tolas/test/hand_test/labels/" + count_son[0][:-3] + "txt"
+                print (txt_path)
+                # full = file_object
+                flabel_out = open(txt_path, 'w')
+                count = linecache.getline(str_name, cnt+1)
+                count_full_son =count.split()
+                flabel_out.writelines(' '.join([count_full_son[4],str(float(count_full_son[0])/1280.0),str(float(count_full_son[1])/720.0),str(float(count_full_son[2])/1280.0),str(float(count_full_son[3])/720.0)]) + "\n")
+                flabel_out.close()
+
+
+                print (int(count_son[3]))
+                cnt = cnt + int(count_son[3])
+                print (cnt)
+                cnt += 1
+
+
+    finally:
+         file_object.close( )
+
+if __name__ == "__main__":
+    check_hand_labels('/home/tolas/test/hand_test/hand_all_groundturth.txt')
