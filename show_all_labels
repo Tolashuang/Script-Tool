@@ -1,0 +1,36 @@
+import os
+import cv2
+
+
+def showYoloLabels(file_name):
+    print(file_name)
+    ftxt = open(file_name, 'r')
+    lns = ftxt.readlines()
+    img_name=file_name.replace("labels","JPEGImages").replace("txt","jpg")
+    img = cv2.imread(img_name)
+    (height,width,_)=img.shape
+    if img == None:
+        print("error while reading image " + file_name + ".jpg")
+        return
+    for ln in lns:
+        label = ln.rstrip('\n').split()
+        (cx,cy,w,h) = (float(label[1]), float(label[2]), float(label[3]), float(label[4]))
+        cv2.rectangle(img, (int((cx-w/2)*width), int((cy-h/2)*height)),
+                      (int((cx + w / 2) * width), int((cy + h / 2) * height)), (0, 255, 0), 2)
+    save_path = img_name.replace("JPEGImages","show_rects")
+    save_folder = os.path.dirname(save_path)
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)
+
+    cv2.imwrite(save_path,img)
+    # cv2.imshow("test",img)
+    # cv2.waitKey(0)
+
+
+
+if __name__ == "__main__":
+    print(os.getcwd())
+    ftest = open("./list.txt", 'r')
+    lines = ftest.readlines()
+    for strFileName in lines:
+        showYoloLabels(strFileName.rstrip())
