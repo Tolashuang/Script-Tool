@@ -1,0 +1,24 @@
+import os
+import cv2
+from PIL import Image
+import numpy as np
+
+img_root = '/home/tolas/stage/data_robot/show_rects/'
+fps = 15
+size = (640, 480)
+fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+vw = cv2.VideoWriter('file.avi', fourcc=fourcc, fps=1.0, frameSize=size)
+videoWriter = cv2.VideoWriter('/home/tolas/stage/data_robot/saveVideo1.avi',fourcc,fps,(640,480))
+ftxt = open('/home/tolas/stage/data_robot/11111.txt', 'r')
+n=0
+for lns in ftxt.readlines():
+    print(lns)
+    print(n)
+    n=n+1
+    label = lns.rstrip('\n')
+    frame = cv2.imread(label)
+    cv2.imshow("img",frame)
+    cv2.waitKey(10)
+    videoWriter.write(frame)
+print(n)
+videoWriter.release()
