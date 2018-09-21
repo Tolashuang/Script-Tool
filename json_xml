@@ -1,0 +1,140 @@
+DEBUG_FLAG = True
+import cv2
+from PIL import Image
+if DEBUG_FLAG:
+    from PIL import ImageDraw
+import json
+import numpy as np
+
+from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import Element, SubElement, ElementTree
+from xml.dom import minidom
+
+def check_json(json_name):
+    flabel = open(json_name)
+    print(flabel)
+    json_obj = json.load(flabel)
+    cnt=0
+    r=0
+    for node in json_obj:
+        img_name = str(node['name'])
+        print(img_name)
+        try:
+            img = Image.open('/home/tolas/stage/bdd100k/JPEGImages/' + img_name)
+            flabel_out = open('/home/tolas/stage/bdd100k/labels/' + img_name[:-4] + ".xml", 'w')
+            global width, height
+            [width, height] = img.size
+            width_str = str(width)
+            height_str = str(height)
+            print ([width, height])
+        except IOError:
+            print ('fail to open image:' + img_name)
+            continue
+        except:
+            print ('Error occurred.')
+            continue
+        labels = str(node['labels'])
+        # print(labels)
+        root = Element('annotation')
+        folder = SubElement(root, 'folder')
+        folder.text = 'bdd100k'
+        filename = SubElement(root, 'filename')
+        size = SubElement(root, 'size')
+        filename.text = img_name
+        width = SubElement(size, 'width')
+        width.text = width_str
+        height = SubElement(size, 'height')
+        height.text = height_str
+        depth = SubElement(size, 'depth')
+        depth.text = '3'
+
+        for node_son in node['labels']:
+            # print(node_son)
+            category = str(node_son['category'])
+            print(category)
+            obj = SubElement(root, 'object')
+            name = SubElement(obj, 'name')
+            name.text = category
+
+            try:
+                box2d = str(node_son['box2d'])
+                box2d_dict = eval(box2d)
+                # global x1,x2,y1,y2
+                bndbox = SubElement(obj, 'bndbox')
+                for i in box2d_dict:
+                    if i == 'x1':
+                        x1 = box2d_dict[i]
+                        x1_str = str(x1)
+                        xmin = SubElement(bndbox, 'xmin')
+                        xmin.text = x1_str
+                    if i == 'x2':
+                        x2 = box2d_dict[i]
+                        x2_str = str(x2)
+                        ymin = SubElement(bndbox, 'ymin')
+                        ymin.text = y1_str
+                    if i == 'y1':
+                        y1 = box2d_dict[i]
+                        y1_str = str(y1)
+                        xmax = SubElement(bndbox, 'xmax')
+                        xmax.text = y1_str
+                    if i == 'y2':
+                        y2 = box2d_dict[i]
+                        y2_str = str(y2)
+                        ymax = SubElement(bndbox, 'ymax')
+                        ymax.text = y2_str
+            except:
+                continue
+
+        xml_string = ET.tostring(root)
+        tree = minidom.parseString(xml_string)
+        xml_string = tree.toprettyxml()
+        # print(xml_string)
+        flabel_out.write(xml_string)
+        flabel_out.close()
+
+def process():
+    root = Element('annotation')
+    folder = SubElement(root, 'folder')
+    folder.text = 'hand gesture'
+    filename = SubElement(root, 'filename')
+    filename.text = '1.jpg'
+    size = SubElement(root, 'size')
+    width = SubElement(size, 'width')
+    width.text = '1920'
+    height = SubElement(size, 'height')
+    height.text = '1080'
+    depth = SubElement(size, 'depth')
+    depth.text = '3'
+    segmented = SubElement(root, 'segmented')
+    segmented.text = '0'
+    obj = SubElement(root, 'object')
+    name = SubElement(obj, 'name')
+    name.text = 'bus'
+    pos = SubElement(obj, 'pos')
+    pos.text = 'Unspecified'
+    truncated = SubElement(obj, 'truncated')
+    truncated.text = '1'
+    difficult = SubElement(obj, 'difficult')
+    difficult.text = '0'
+    bndbox = SubElement(obj, 'bndbox')
+    xmin = SubElement(bndbox, 'xmin')
+    xmin.text = '118'
+    ymin = SubElement(bndbox, 'ymin')
+    ymin.text = '118'
+    xmax = SubElement(bndbox, 'xmax')
+    xmax.text = '500'
+    ymax = SubElement(bndbox, 'ymax')
+    ymax.text = '211'
+    xml_string = ET.tostring(root)
+
+    tree = minidom.parseString(xml_string)
+    xml_string = tree.toprettyxml()
+    print(xml_string)
+    f=open('/home/tolas/stage/bdd100k/2.xml',"w")
+    f.write(xml_string)
+    f.close()
+
+
+if __name__ == "__main__":
+    check_json('/home/tolas/stage/bdd100k/bdd100k_labels.json')
+    # process()
