@@ -70,13 +70,13 @@ def check_json(json_name):
                     if i == 'x2':
                         x2 = box2d_dict[i]
                         x2_str = str(x2)
-                        ymin = SubElement(bndbox, 'ymin')
-                        ymin.text = y1_str
+                        xmax = SubElement(bndbox, 'xmax')
+                        xmax.text = y1_str
                     if i == 'y1':
                         y1 = box2d_dict[i]
                         y1_str = str(y1)
-                        xmax = SubElement(bndbox, 'xmax')
-                        xmax.text = y1_str
+                        ymin = SubElement(bndbox, 'ymin')
+                        ymin.text = y1_str
                     if i == 'y2':
                         y2 = box2d_dict[i]
                         y2_str = str(y2)
