@@ -1,0 +1,18 @@
+import os
+import cv2
+
+def photo2photo(img_name):
+    img = cv2.imread(img_name)
+    save_path = img_name.replace("Images", "ture")
+    cv2.imwrite(save_path, img)
+
+if __name__ == "__main__":
+    print(os.getcwd())
+    ftest = open("/media/tolas/ForwardX_1/huanugtao/CrowdHuman/check_photo2.txt", 'r')
+    lines = ftest.readlines()
+    n = 0
+    for strFileName in lines:
+        photo2photo(strFileName.rstrip())
+        n=n+1
+        print(n)
+    print(n)
