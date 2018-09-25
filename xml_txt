@@ -1,0 +1,76 @@
+import os
+import math
+from PIL import Image
+from xml.etree import ElementTree
+
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+
+classes = ["bike", "bus", "car", "motor", "person", "rider", "traffic light", "traffic sign", "train", "truck"]
+
+def find_x_y_w_h(width,height, content):
+    print(content[0])
+    dw = 1./width
+    dh = 1./height
+    x = ((float(content[1]) + float(content[3]))/2.0)*dw
+    y = ((float(content[2]) + float(content[0]))/2.0)*dh
+    x_m = float(content[1]) - float(content[3])
+    y_m = float(content[2]) - float(content[0])
+    w = dw * x_m
+    h = dh * y_m
+    return (x,y,w,h)
+
+# os.chdir(r"C:/Users/Tolas_huang/Desktop/YOLO_database")
+# files = os.listdir(r"D:/yolo_train/data/Annotations/")
+files = open("/home/tolas/stage/bdd100k/label_txt_in.txt")
+n=1
+
+while (1):
+
+    line_name = files.readline().rstrip()
+    txt_name = line_name.replace("labels", "labels_txt").replace("xml", "txt")
+    print(line_name,txt_name)
+    if not txt_name:
+        break
+    else:
+        fin = open(txt_name, "w+")
+    with open(line_name, 'r') as f:
+        tree = ET.parse(f)
+        root = tree.getroot()
+    global width, height, i
+    root_son_size = root.find('size')
+    for size_son in root_son_size.iter("size"):
+        size = size_son.getiterator('size')
+        for size_son in size:
+            for width_m in size_son.iter(tag='width'):
+                print(width_m.text)
+                width = width_m.text
+            for height_m in size_son.iter(tag='height'):
+                print(height_m.text)
+                height = height_m.text
+
+    for son_of_root in root.iter('object'):
+        for elem in son_of_root.iter(tag='name'):
+            n=n+1
+            print(elem.text)
+            i = classes.index(elem.text)
+            print(elem.text,i)
+        for box in son_of_root.iter(tag='bndbox'):
+            content = []
+            for box_son in box:
+                content.append(box_son.text)
+                print(content)
+                if len(content) == 4:
+                    (x,y,w,h) = find_x_y_w_h(float(width),float(height),content)
+                    print(x,y,w,h)
+                    fin.writelines("%d %f %f %f %f" % (i, x, y, w, h))
+                    fin.writelines("\n")
+
+    fin.close()
+
+    print("========")
+    if not line_name:
+        break
+print(n)
