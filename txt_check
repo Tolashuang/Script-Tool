@@ -1,0 +1,37 @@
+import os
+import cv2
+
+
+def txt_check(file_name):
+    print(file_name)
+    ftxt = open(file_name, 'r')
+    lns = ftxt.readlines()
+    img_name = file_name.replace("labels","JPEGImages").replace("txt","jpg")
+    txt_name = file_name.replace("labels","labels_new")
+    # img_name = file_name.replace("txt", "jpg")
+    img = cv2.imread(img_name)
+    height,width,n = img.shape
+    print(height,width)
+    fin = open(txt_name, 'w+')
+
+    for ln in lns:
+        label = ln.rstrip('\n').split(' ')
+        print(label)
+        (cx,cy,w,h) = (float(label[0]),float(label[1]), float(label[2]), float(label[3]))
+        print(cx)
+        fin.writelines("%d %f %f %f %f" % (0,cx/1280,cy/720,w/1280,h/720))
+        fin.writelines("\n")
+    fin.close()
+    ftxt.close()
+
+
+if __name__ == "__main__":
+    print(os.getcwd())
+    ftest = open("/home/tolas/stage/realsense/data.txt", 'r')
+    lines = ftest.readlines()
+    n = 0
+    for strFileName in lines:
+        txt_check(strFileName.rstrip())
+        n=n+1
+        print(n)
+    print(n)
