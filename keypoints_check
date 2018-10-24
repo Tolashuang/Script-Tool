@@ -1,0 +1,103 @@
+import os
+import cv2
+import random
+
+def keypoints_check(file_name):
+    print(file_name)
+    ftxt = open(file_name, 'r')
+    lns = ftxt.readlines()
+    img_name = file_name.replace("points","JPEGImages").replace("txt","jpg")
+    txt_name = file_name.replace("points","JPEGImages_points")
+    # jpg_name = file_name.replace("labels","labels")
+    # img_name = file_name.replace("txt", "jpg")
+    # print(jpg_name)
+    img = cv2.imread(img_name)
+    height,width,n = img.shape
+    print(height,width)
+
+    for ln in lns:
+
+        label = ln.rstrip('\n').split(' ')
+        print(label)
+        (cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4) = (float(label[0]), float(label[1]), float(label[2]), float(label[3]),float(label[4]), float(label[5]),float(label[6]), float(label[7]))
+        # print(cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4)
+        # cv2.boundingRect()
+        x_max = max(cx1, cx2, cx3, cx4)
+        x_min = min(cx1, cx2, cx3, cx4)
+        y_max = max(cy1, cy2, cy3, cy4)
+        y_min = min(cy1, cy2, cy3, cy4)
+        h = y_max - y_min
+        w = x_max - x_min
+        print(cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4,"\n", w ,h, "\n", x_max ,x_min,y_max,y_min)
+
+        xx = (x_max + x_min) / (2 * 1280)
+        yy = (y_max + y_min) / (2 * 720)
+        ww = (x_max - x_min) / (2 * 1280)
+        hh = (y_max - y_min) / (2 * 720)
+        # fin_txt = open(jpg_name,'a+')
+        # fin_txt.writelines("%d %f %f %f %f" % (0,xx, yy, ww, hh))
+        # fin_txt.writelines("\n")
+
+        for i in range(5):
+
+            tmp1 = random.randint(10, 50)
+            tmp2 = random.randint(10, 50)
+            xtmp1 = tmp1 / 100
+            xtmp2 = tmp2 / 100
+            print(xtmp1, xtmp2)
+            img = cv2.imread(img_name)
+            lx = x_min - w * xtmp1/2
+            rx = x_max + w * xtmp1/2
+            ly = y_min - h * xtmp2/2
+            ry = y_max + h * xtmp2/2
+            print(lx ,rx , ly ,ry  )
+            if (lx) <  1 :
+                lx = 1
+            if (ly) <  1 :
+                ly = 1
+            if (rx) > 1279:
+                rx = 1279
+            if (ry) > 719:
+                ry = 719
+            cropImage = img[int(ly):int(ry), int(lx):int(rx)]
+            cv2.imwrite(txt_name[:-4] + "__" + str(i) + ".bmp", cropImage)
+            # cv2.imshow(jpg_name[:-5] + "__" + str(i) + ".bmp", cropImage)
+            fw = w * (1 + xtmp1)
+            fh = h * (1 + xtmp2)
+            dx1 = (cx1 - lx)/fw
+            dy1 = (cy1 - ly)/fh
+            dx2 = (cx2 - lx)/fw
+            dy2 = (cy2 - ly)/fh
+            dx3 = (cx3 - lx)/fw
+            dy3 = (cy3 - ly)/fh
+            dx4 = (cx4 - lx)/fw
+            dy4 = (cy4 - ly)/fh
+            context1 = str(dx1) + "," + str(dy1)
+            context2 = str(dx2) + "," + str(dy2)
+            context3 = str(dx3) + "," + str(dy3)
+            context4 = str(dx4) + "," + str(dy4)
+
+            # fin.writelines("%f %s %f %s %f %s %f %s %f %s %f %s %f %s %f" % (dx1,",",dy1,","dx2,",",dy2,","dx3,",",dy3,","dx4,",",dy4))
+            fin = open(txt_name[:-4] + "__" + str(i) + ".txt", 'w+')
+            fin.writelines(context1)
+            fin.writelines("\n")
+            fin.writelines(context2)
+            fin.writelines("\n")
+            fin.writelines(context3)
+            fin.writelines("\n")
+            fin.writelines(context4)
+            fin.close()
+        # fin_txt.close()
+    ftxt.close()
+
+
+if __name__ == "__main__":
+    # print(os.getcwd())
+    ftest = open("/home/tolas/stage/realsense/happy/data_points.txt", 'r')
+    lines = ftest.readlines()
+    n = 0
+    for strFileName in lines:
+        keypoints_check(strFileName.rstrip())
+        n=n+1
+        print(n)
+    print(n)
