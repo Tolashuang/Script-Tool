@@ -44,8 +44,3 @@ caffe 下与loss相关的一些说明:
 4 train loss 趋于不变,test loss 不断下降,说明数据集100%有问题
 5 train loss 不断上升,test loss 不断上升(最终变为NaN),可能是网络结构设计不当,训练超参数设置不当,程序bug等某个问题引起
 6 train loss 不断上下跳动,可能引起的原因:学习率过大,或者批处理大小太小
---------------------- 
-作者：跬步达千里 
-来源：CSDN 
-原文：https://blog.csdn.net/liyuan123zhouhui/article/details/74453980 
-版权声明：本文为博主原创文章，转载请附上博文链接！
