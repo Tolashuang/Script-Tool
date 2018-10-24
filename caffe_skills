@@ -1,0 +1,51 @@
+weight_decay防止过拟合的参数,使用方式:
+1 样本越多,该值越小
+2 模型参数越多,该值越大
+一般建议值:
+weight_decay: 0.0005
+
+lr_mult,decay_mult
+关于偏置与参数使用不同的学习率与权重衰减项:
+1 偏置的学习率一般为参数的两倍
+比如一个卷积,有偏置的话,其学习率应该是
+  param { lr_mult: 1 }
+  param { lr_mult: 2 } 
+
+偏置设为2倍,能够加速收敛
+
+对于偏置,其衰减项一般设置为0,还是对应上面的卷积:
+  param { lr_mult: 1
+          decay_mult:1 }
+  param { lr_mult: 2 
+          decay_mult:0} 
+
+
+批处理,批处理中需要加上3个0,即批处理的参数是根据上一批的数据进行滑动平均来更新,而不是根据梯度来更新:
+  param { lr_mult: 0 
+          decay_mult:0} 
+  param { lr_mult: 0 
+          decay_mult:0}           
+  param { lr_mult: 0 
+          decay_mult:0} 
+还有参数:use_global_stats
+在训练时要设置为false,代表需要批处理的均值方差要参考全局信息来更新
+在测试时,要为true,代表不使用自己均值方差和全局的均值方差来得到批处理的均值和方差,而是使用全局均值方差,即训练好的均值方差
+另一个参数:moving_average_fraction
+代表参考训练时均值方差更新的速度,默认是0.999,参考值是0.9~0.999之间
+最后一个参数eps:
+防止批处理时除以0,默认值是1e-5
+
+
+
+caffe 下与loss相关的一些说明:
+1 train loss 不断下降,test loss 不断下降,说明网络正在学习
+2 train loss 不断下降,test loss 趋于不变,说明网络过拟合
+3 train loss 趋于不变,test loss 趋于不变,说明学习遇到瓶颈,需要减小学习率或者批处理大小
+4 train loss 趋于不变,test loss 不断下降,说明数据集100%有问题
+5 train loss 不断上升,test loss 不断上升(最终变为NaN),可能是网络结构设计不当,训练超参数设置不当,程序bug等某个问题引起
+6 train loss 不断上下跳动,可能引起的原因:学习率过大,或者批处理大小太小
+--------------------- 
+作者：跬步达千里 
+来源：CSDN 
+原文：https://blog.csdn.net/liyuan123zhouhui/article/details/74453980 
+版权声明：本文为博主原创文章，转载请附上博文链接！
