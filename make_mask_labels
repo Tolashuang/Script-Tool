@@ -1,0 +1,74 @@
+import os
+from io import StringIO
+import cv2
+from skimage import draw,data
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+def make_mask_labels(file_name):
+    print(file_name)
+    ftxt = open(file_name, 'r')
+    lns = ftxt.readlines()
+    img_name = file_name.replace("points","JPEGImages").replace("txt","bmp")
+    txt_name = file_name.replace("points","JPEGImages_mask").replace("txt","bmp")
+    # jpg_name = file_name.replace("labels","labels")
+    # img_name = file_name.replace("txt", "jpg")
+    print(img_name)
+    img = cv2.imread(img_name)
+    (h,w,b) = img.shape
+    print(h,w,b)
+    height = h
+    width = w
+
+    dst = np.zeros((height, width, b), np.uint8)
+    # all = np.loadtxt(file_name)
+    # print(all.shape)
+    list = []
+
+    for ln in lns:
+
+        label = ln.rstrip('\n').split(',')
+        print(label)
+        # (cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4) = (float(label[0]), float(label[1]), float(label[2]), float(label[3]),float(label[4]), float(label[5]),float(label[6]), float(label[7]))
+        # (cx1, cy1) = (float(label[0]) * height, float(label[1]) * width)
+        list.append(float(label[0])*width)
+        list.append(float(label[1])*height)
+        # print(list)
+        # print(cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4)
+        # Y = np.array([cx1, cx2, cx3, cx4])
+        # X = np.array([cy1, cy2, cy3, cy4])
+        # rr, cc = draw.polygon(X, Y)
+        # draw.set_color(img, [rr, cc], [255, 255, 255])
+    (cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4) = (int(list[0]), int(list[1]), int(list[2]), int(list[3]),int(list[4]), int(list[5]),int(list[6]), int(list[7]))
+    pts = np.array([[cx1, cy1], [cx2, cy2], [cx3, cy3], [cx4, cy4]], np.int32)
+    pts = pts.reshape((-1, 1, 2))
+    img = cv2.polylines(img, [pts], True, (255, 255, 255))
+    cv2.fillPoly(img, [pts], (255, 255, 255))
+    print(img.shape)
+    cv2.imshow('image', img)
+    cv2.waitKey(1000)
+    print(dst.shape)
+    print(img.shape)
+    for i in range(height-1):
+
+        for j in range(width-1):
+            print(i,j)
+            (b, g, r) = img[i, j]
+            if b!= 255 or g!= 255 or r !=255 :
+                dst[i, j] = (0, 0, 0)
+            else:
+                dst[i, j] = (255, 255, 255)
+    cv2.imshow('image', dst)
+    cv2.imwrite(txt_name,dst)
+
+if __name__ == "__main__":
+    # print(os.getcwd())
+    ftest = open("/home/tolas/stage/realsense/mask_data/points.txt", 'r')
+    lines = ftest.readlines()
+    n = 0
+    for strFileName in lines:
+        make_mask_labels(strFileName.rstrip())
+        n=n+1
+        print(n)
+    print(n)
