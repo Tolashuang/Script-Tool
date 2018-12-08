@@ -1,0 +1,28 @@
+import cv2
+import numpy as np
+
+def make_mask_labels(file_name):
+    print(file_name)
+    flabel_out_name = file_name.replace("labels","labels_new")
+    flabel_out = open(flabel_out_name, 'w+')
+    ftxt = open(file_name, 'r')
+    lns = ftxt.readlines()
+    for ln in lns:
+        all_row = ln.split()
+        if (all_row[0]) == str(0):
+            flabel_out.writelines(str(3) + ' ' + all_row[1] + ' ' + all_row[2] +' ' +  all_row[3] + ' ' + all_row[4]+ '\n')
+        if (all_row[0]) == str(4):
+            flabel_out.writelines(str(0) + ' ' + all_row[1] + ' ' + all_row[2] +' ' +  all_row[3] + ' ' + all_row[4] + '\n')
+    flabel_out.close()
+
+
+
+if __name__ == "__main__":
+    ftest = open("/media/tolas/HT18500920177/3hand_body/2017_0807_155420/2.txt", 'r')
+    lines = ftest.readlines()
+    n = 0
+    for strFileName in lines:
+        make_mask_labels(strFileName.rstrip())
+        n=n+1
+        print(n)
+    print(n)
