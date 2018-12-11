@@ -1,0 +1,70 @@
+from numpy import *
+import numpy as np
+
+def creat_box_point_X():
+    # width = np.mat()
+    # lenth = np.mat()
+    box_point = []
+    N = 0
+    box_point.append(N)
+
+    for shelf in range(60):
+        if shelf%2:
+            print('even',shelf)
+            N = N + 240
+            box_point.append(N)
+        else:
+            print('odd',shelf)
+            N = N + 320
+            box_point.append(N)
+    print(box_point)
+    print(len(box_point))
+    return box_point
+
+def creat_pass_road():
+    pass_A = []
+    pass_B = []
+    pass_C = []
+    for pass_point in range(300):
+        if pass_point <= 20 and  pass_point >=0:
+            pass_A.append(pass_point)
+        if pass_point <= 128 and pass_point >=104:
+            pass_B.append(pass_point)
+        if pass_point <= 224 and pass_point>=200
+            pass_C.append(pass_point)
+        else:
+            continue
+    return pass_A+pass_B+pass_C
+
+def citybolckDistance(vec1,vec2,box_x,pass_road_Y):
+    global turn
+    vec1_mat = np.mat(vec1)
+    vec2_mat = np.mat(vec2)
+    if vec1[1] in pass_road_Y and vec2[1] in pass_road_Y:
+        if abs(vec1[1] - vec2[1])> 70 and abs(vec1[0]-vec2[0]) > 32:
+            dist1 = np.sum(np.abs(vec1_mat - vec2_mat))
+            turn = 1
+        if abs(vec1[1] - vec2[1])> 70 and abs(vec1[0]-vec2[0]) < 32:
+            dist1 = np.sum(np.abs(vec1_mat - vec2_mat))
+            turn = 0
+        if abs(vec1[1] - vec2[1])< 70 and abs(vec1[0]-vec2[0]) < 32:
+            dist1 = np.sum(np.abs(vec1_mat - vec2_mat))
+            turn = 0
+        if abs(vec1[1] - vec2[1])< 70 and abs(vec1[0] - vec2[0]) > 32:
+            dist1 = np.sum(np.abs(vec1_mat - vec2_mat))
+            dist1 = dist1 + 2*min(vec2[1],(vec2[1]-20),(vec2[1]-104),(vec2[1]-128),(vec2[1]-200),(vec2[1]-228))
+            turn = 2
+
+    dist1 = np.sum(np.abs(vec1_mat - vec2_mat))
+    print("dist1 = "+str(dist1))
+
+    return turn, dist1
+
+if __name__ == "__main__":
+    vec1 = [1,110]
+    vec2 = [100,6]
+    box_x = creat_box_point_X()
+    pass_road_Y = creat_pass_road()
+    turn, dist1 = citybolckDistance(vec1,vec2,box_x,pass_road_Y)
+    print("turn:  ",turn)
+    print("dist1:  ",dist1)
