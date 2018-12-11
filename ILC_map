@@ -30,7 +30,7 @@ def creat_pass_road():
             pass_A.append(pass_point)
         if pass_point <= 128 and pass_point >=104:
             pass_B.append(pass_point)
-        if pass_point <= 224 and pass_point>=200
+        if pass_point <= 224 and pass_point>=200:
             pass_C.append(pass_point)
         else:
             continue
